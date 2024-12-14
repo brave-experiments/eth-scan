@@ -38,17 +38,8 @@ jobs:
       - name: Compile Contracts
         run: yarn compile
 
-      - name: Lint Types
-        run: yarn lint:types
-
-      - name: Lint Source
-        run: yarn lint:source
-
-      - name: Lint Solidity
-        run: yarn lint:solidity
-
-      - name: Lint Formatting
-        run: yarn lint:format
+      - name: Lint
+        run: yarn lint
 
   test:
     name: Test
@@ -56,7 +47,7 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 12
+          - 20
 
     steps:
       - uses: actions/checkout@v2
