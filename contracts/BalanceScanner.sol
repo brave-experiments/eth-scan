@@ -14,11 +14,8 @@ contract BalanceScanner {
     bytes data;
   }
 
-  /**
-   * @notice Get the Ether balance for all addresses specified
-   * @param addresses The addresses to get the Ether balance for
-   * @return results The Ether balance for all addresses in the same order as specified
-   */
+  uint256 private constant BALANCE_OF_GAS = 20_000;
+
   function etherBalances(address[] calldata addresses) external view returns (Result[] memory results) {
     results = new Result[](addresses.length);
 
@@ -27,13 +24,6 @@ contract BalanceScanner {
     }
   }
 
-  /**
-   * @notice Get the ERC-20 token balance of `token` for all addresses specified
-   * @dev This does not check if the `token` address specified is actually an ERC-20 token
-   * @param addresses The addresses to get the token balance for
-   * @param token The address of the ERC-20 token contract or 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE for ETH
-   * @return results The token balance for all addresses in the same order as specified
-   */
   function tokenBalances(address[] calldata addresses, address token) external view returns (Result[] memory results) {
     results = new Result[](addresses.length);
 
@@ -42,17 +32,11 @@ contract BalanceScanner {
         results[i] = Result(true, abi.encode(addresses[i].balance));
       } else {
         bytes memory data = abi.encodeWithSignature("balanceOf(address)", addresses[i]);
-        results[i] = staticCall(token, data, 20000);
+        results[i] = staticCall(token, data, BALANCE_OF_GAS);
       }
     }
   }
 
-  /**
-   * @notice Get the ERC-20 token balance from multiple contracts for a single owner
-   * @param owner The address of the token owner
-   * @param contracts The addresses of the ERC-20 token contracts or 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE for ETH
-   * @return results The token balances in the same order as the addresses specified
-   */
   function tokensBalance(address owner, address[] calldata contracts) external view returns (Result[] memory results) {
     results = new Result[](contracts.length);
 
@@ -61,28 +45,15 @@ contract BalanceScanner {
       if (contracts[i] == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
         results[i] = Result(true, abi.encode(owner.balance));
       } else {
-        results[i] = staticCall(contracts[i], data, 20000);
+        results[i] = staticCall(contracts[i], data, BALANCE_OF_GAS);
       }
     }
   }
 
-  /**
-   * @notice Call multiple contracts with the provided arbitrary data
-   * @param contracts The contracts to call
-   * @param data The data to call the contracts with
-   * @return results The raw result of the contract calls
-   */
   function call(address[] calldata contracts, bytes[] calldata data) external view returns (Result[] memory results) {
     return call(contracts, data, gasleft());
   }
 
-  /**
-   * @notice Call multiple contracts with the provided arbitrary data
-   * @param contracts The contracts to call
-   * @param data The data to call the contracts with
-   * @param gas The amount of gas to call the contracts with
-   * @return results The raw result of the contract calls
-   */
   function call(
     address[] calldata contracts,
     bytes[] calldata data,
@@ -96,13 +67,6 @@ contract BalanceScanner {
     }
   }
 
-  /**
-   * @notice Static call a contract with the provided data
-   * @param target The address of the contract to call
-   * @param data The data to call the contract with
-   * @param gas The amount of gas to forward to the call
-   * @return result The result of the contract call
-   */
   function staticCall(
     address target,
     bytes memory data,
@@ -120,13 +84,7 @@ contract BalanceScanner {
     return Result(false, "");
   }
 
-  /**
-   * @notice Get code size of address
-   * @param _address The address to get code size from
-   * @return size Unsigned 256-bits integer
-   */
   function codeSize(address _address) private view returns (uint256 size) {
-    // solhint-disable-next-line no-inline-assembly
     assembly {
       size := extcodesize(_address)
     }
