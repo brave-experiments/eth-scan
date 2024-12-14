@@ -3,7 +3,6 @@
   "parser": "@typescript-eslint/parser",
   "extends": ["eslint:recommended", "eslint-config-prettier"],
   "plugins": ["eslint-plugin-import"],
-  "ignorePatterns": ["src/vendor/**/*"],
   "rules": {
     "comma-dangle": ["error", "never"],
     "curly": "error",
