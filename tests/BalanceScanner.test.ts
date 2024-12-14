@@ -65,6 +65,16 @@ describe('BalanceScanner', () => {
       await expect(getTuple(contract.tokenBalances(addresses, token.address))).resolves.toStrictEqual(expectedValue);
     });
 
+    it('returns the ether balance for a 0xEeee***EEeE address', async () => {
+      const { contract, signers, token } = await loadFixture(fixture);
+      const address = await signers[1].getAddress();
+      const etherBalance = await signers[1].getBalance();
+
+      await expect(
+        getTuple(contract.tokenBalances([address], '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'))
+      ).resolves.toEqual([[true, `0x${etherBalance.toHexString().slice(2).padStart(64, '0')}`]]);
+    });
+
     it('returns an empty array when no addresses passed', async () => {
       const { contract, token } = await loadFixture(fixture);
 
@@ -94,6 +104,16 @@ describe('BalanceScanner', () => {
         [true, '0x00000000000000000000000000000000000000000000000000000000000003e8'],
         [true, '0x0000000000000000000000000000000000000000000000000000000000000001']
       ]);
+    });
+
+    it('returns the ether balance for a 0xEeee***EEeE address', async () => {
+      const { contract, signers } = await loadFixture(fixture);
+      const address = await signers[1].getAddress();
+      const etherBalance = await signers[1].getBalance();
+
+      await expect(
+        getTuple(contract.tokensBalance(address, ['0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE']))
+      ).resolves.toEqual([[true, `0x${etherBalance.toHexString().slice(2).padStart(64, '0')}`]]);
     });
 
     it('returns an empty array when no addresses passed', async () => {
